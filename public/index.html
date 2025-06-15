@@ -62,9 +62,9 @@
 <body>
   <div class="container">
     <h1>Red Dolphin</h1>
-    <form id="monitorForm">
+    <form id="monitorForm" novalidate>
       <label for="url">Company URL</label>
-      <input type="text" id="url" name="url" placeholder="https://example.com" required>
+      <input type="text" id="url" name="url" placeholder="example.com" required>
 
       <label for="name">Your Name</label>
       <input type="text" id="name" name="name" required>
@@ -96,16 +96,18 @@
 
       const form = e.target;
       let url = form.url.value.trim();
+
+      // Normalize URL
       if (!/^https?:\/\//i.test(url)) {
         url = 'https://' + url;
       }
 
       const data = {
         url,
-        name: form.name.value,
-        email: form.email.value,
-        phone: form.phone.value,
-        countryCode: form.countryCode.value,
+        name: form.name.value.trim(),
+        email: form.email.value.trim(),
+        phone: form.phone.value.trim(),
+        countryCode: form.countryCode.value.trim(),
         interval: form.interval.value
       };
 
@@ -120,7 +122,7 @@
         alert(result);
         form.reset();
       } catch (error) {
-        alert('Failed to register. Please try again.');
+        alert('❌ Failed to register. Please try again.');
         console.error(error);
       }
     });
