@@ -1,39 +1,128 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Red Dolphin Signup</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Red Dolphin – Monitor Your Website</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f0f4f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background-color: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      width: 100%;
+    }
+
+    h1 {
+      text-align: center;
+      color: #1a202c;
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      margin-top: 1rem;
+      margin-bottom: 0.3rem;
+      font-weight: bold;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #cbd5e0;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #0077cc;
+      color: white;
+      border: none;
+      margin-top: 1.5rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #005fa3;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <h1>Red Dolphin – Monitor Your Website</h1>
-    <form id="register-form">
-      <label>Company URL</label><input type="url" name="url" required />
-      <label>Your Name</label><input type="text" name="name" required />
-      <label>Company Email</label><input type="email" name="email" required />
-      <label>Phone (optional)</label><input type="text" name="phone" />
-      <label>Country Code (optional)</label><input type="text" name="countryCode" />
-      <label>Check Interval</label>
-      <select name="interval" required>
+    <h1>Red Dolphin</h1>
+    <form id="monitorForm">
+      <label for="url">Company URL</label>
+      <input type="text" id="url" name="url" placeholder="https://example.com" required>
+
+      <label for="name">Your Name</label>
+      <input type="text" id="name" name="name" required>
+
+      <label for="email">Company Email</label>
+      <input type="email" id="email" name="email" required>
+
+      <label for="phone">Phone (optional)</label>
+      <input type="text" id="phone" name="phone">
+
+      <label for="countryCode">Country Code (optional)</label>
+      <input type="text" id="countryCode" name="countryCode" placeholder="+91">
+
+      <label for="interval">Check Interval</label>
+      <select id="interval" name="interval" required>
         <option value="10sec">Every 10 seconds</option>
         <option value="30sec">Every 30 seconds</option>
         <option value="1min">Every 1 minute</option>
         <option value="5min">Every 5 minutes</option>
       </select>
+
       <button type="submit">Register</button>
     </form>
-    <div id="message"></div>
   </div>
+
   <script>
-    document.getElementById('register-form').addEventListener('submit', async e => {
+    document.getElementById('monitorForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const data = Object.fromEntries(new FormData(e.target));
-      const res = await fetch('/register', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(data)
-      });
-      document.getElementById('message').innerText = await res.text();
+
+      const form = e.target;
+      let url = form.url.value.trim();
+      if (!/^https?:\/\//i.test(url)) {
+        url = 'https://' + url;
+      }
+
+      const data = {
+        url,
+        name: form.name.value,
+        email: form.email.value,
+        phone: form.phone.value,
+        countryCode: form.countryCode.value,
+        interval: form.interval.value
+      };
+
+      try {
+        const response = await fetch('/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.text();
+        alert(result);
+        form.reset();
+      } catch (error) {
+        alert('Failed to register. Please try again.');
+        console.error(error);
+      }
     });
   </script>
 </body>
