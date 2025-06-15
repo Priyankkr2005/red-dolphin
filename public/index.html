@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Red Dolphin Signup</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Red Dolphin – Monitor Your Website</h1>
+    <form id="register-form">
+      <label>Company URL</label><input type="url" name="url" required />
+      <label>Your Name</label><input type="text" name="name" required />
+      <label>Company Email</label><input type="email" name="email" required />
+      <label>Phone (optional)</label><input type="text" name="phone" />
+      <label>Country Code (optional)</label><input type="text" name="countryCode" />
+      <label>Check Interval</label>
+      <select name="interval" required>
+        <option value="10sec">Every 10 seconds</option>
+        <option value="30sec">Every 30 seconds</option>
+        <option value="1min">Every 1 minute</option>
+        <option value="5min">Every 5 minutes</option>
+      </select>
+      <button type="submit">Register</button>
+    </form>
+    <div id="message"></div>
+  </div>
+  <script>
+    document.getElementById('register-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(e.target));
+      const res = await fetch('/register', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      });
+      document.getElementById('message').innerText = await res.text();
+    });
+  </script>
+</body>
+</html>
