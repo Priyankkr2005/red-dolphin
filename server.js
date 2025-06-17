@@ -6,7 +6,6 @@ const nodemailer = require('nodemailer');
 const twilio = require('twilio');
 const axios = require('axios');
 const path = require('path');
-const fs = require('fs');
 
 const app = express();
 app.use(bodyParser.json());
@@ -27,36 +26,45 @@ const twilioClient = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH);
 
 app.post('/register', (req, res) => {
   const { url, email, phone, countryCode, interval } = req.body;
+
   const cronMap = {
     '10sec': '*/10 * * * * *',
     '30sec': '*/30 * * * * *',
     '1min': '0 * * * * *',
     '5min': '*/5 * * * *'
   };
+
+  if (!cronMap[interval]) {
+    return res.status(400).send('Invalid interval selected.');
+  }
+
   if (currentTask) currentTask.stop();
+
   const schedule = cronMap[interval];
   currentTask = cron.schedule(schedule, async () => {
     try {
       await axios.get(url);
       logs.push(`${new Date().toISOString()} - UP`);
-    } catch {
+    } catch (err) {
       logs.push(`${new Date().toISOString()} - DOWN`);
       transporter.sendMail({
         from: process.env.EMAIL_USER,
         to: email,
         subject: `🚨 ${url} is DOWN`,
         text: `${url} is down as of ${new Date().toLocaleTimeString()}`
-      });
+      }).catch(console.error);
+
       if (phone && countryCode) {
         twilioClient.messages.create({
           body: `${url} is DOWN!`,
           from: process.env.TWILIO_PHONE,
-          to: countryCode + phone
+          to: `${countryCode}${phone}`
         }).catch(console.error);
       }
     }
   });
-  res.send('Registered successfully!');
+
+  res.send('Monitoring started successfully!');
 });
 
 app.post('/stop-monitoring', (req, res) => {
@@ -65,13 +73,15 @@ app.post('/stop-monitoring', (req, res) => {
     currentTask = null;
     logs.push(`${new Date().toISOString()} - Monitoring Stopped`);
   }
-  res.sendStatus(200);
+  res.send('Monitoring stopped.');
 });
 
 app.get('/logs', (req, res) => {
-  res.send(logs.join('\n'));
+  res.type('text/plain').send(logs.join('\n'));
 });
 
-app.listen(process.env.PORT || 5000, () => {
-  console.log(`🚀 Server running on port ${process.env.PORT || 5000}`);
+// ✅ Use the correct PORT on Render
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
 });
