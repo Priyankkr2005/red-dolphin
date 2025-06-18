@@ -87,7 +87,10 @@
       </select>
       <button type="submit">Register</button>
     </form>
-    <button id="logsBtn" onclick="window.open('/logs.html', '_blank')">📄 Logs & Status</button>
+    
+    <!-- ✅ Updated logs button -->
+    <button id="logsBtn" onclick="window.open('/logs', '_blank')">📄 Logs & Status</button>
+    
     <button id="stopBtn">⛔ Stop Monitoring</button>
   </div>
   <script>
@@ -120,6 +123,7 @@
         console.error(err);
       }
     });
+
     document.getElementById('stopBtn').addEventListener('click', async () => {
       try {
         await fetch('/stop-monitoring', { method: 'POST' });
